@@ -2,6 +2,12 @@ import httpx
 import logging
 
 import os
+from dotenv import load_dotenv
+
+# Charger le fichier .env dans les variables d'environnement OS
+env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".env"))
+load_dotenv(dotenv_path=env_path)
+
 from langchain_core.tools import tool
 
 try:
