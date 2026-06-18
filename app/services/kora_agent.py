@@ -69,8 +69,9 @@ def list_my_appointments(user_id: str) -> str:
     Utilisez cet outil pour répondre à des questions comme 'quels sont mes rendez-vous ?' ou 'quand est mon prochain rendez-vous ?'.
     Arguments:
       user_id: L'identifiant de l'utilisateur connecté."""
-    if not user_id or user_id == "anonymous":
-        return "Vous n'êtes pas connecté. Veuillez vous connecter pour voir vos rendez-vous."
+    import re
+    if not user_id or user_id == "anonymous" or not re.match(r"^[0-9a-fA-F]{24}$", user_id):
+        return "Vous devez être connecté avec un compte valide pour voir vos rendez-vous."
     
     url = f"{settings.nestjs_base_url}/agent/users/{user_id}/appointments"
     headers = {"x-api-token": settings.api_shared_token}
@@ -215,8 +216,8 @@ def book_appointment(salon_id: str, service_id: str, appointment_date: str, user
     if not service_id or not re.match(r"^[0-9a-fA-F]{24}$", service_id):
         return "Erreur : ID de la prestation (service_id) invalide (doit être un identifiant unique de 24 caractères hexadécimaux). Utilisez d'abord get_salon_details avec l'ID du salon pour obtenir la liste des prestations réelles et leurs identifiants."
         
-    if not user_id or user_id == "anonymous":
-        return "Vous devez être connecté pour réserver. Veuillez vous connecter dans l'application."
+    if not user_id or user_id == "anonymous" or not re.match(r"^[0-9a-fA-F]{24}$", user_id):
+        return "Vous devez être connecté avec un compte valide pour réserver. Veuillez vous connecter dans l'application."
         
     url = f"{settings.nestjs_base_url}/agent/users/{user_id}/appointments"
     headers = {
