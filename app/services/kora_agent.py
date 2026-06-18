@@ -5,10 +5,10 @@ import os
 from langchain_core.tools import tool
 
 try:
-    from deerflow.config import load_config  # type: ignore
+    from deerflow.config.app_config import reload_app_config  # type: ignore
     from deerflow.client import DeerFlowClient  # type: ignore
 except ImportError:
-    load_config = None
+    reload_app_config = None
     DeerFlowClient = None
 
 
@@ -248,7 +248,7 @@ def book_appointment(salon_id: str, service_id: str, appointment_date: str, user
 
 class KoraAgentService:
     def __init__(self):
-        if load_config is None or DeerFlowClient is None:
+        if reload_app_config is None or DeerFlowClient is None:
             self.client = None
             logger.error("DeerFlow Harness non disponible dans cet environnement (deerflow-kernel non installé).")
             return
@@ -256,7 +256,7 @@ class KoraAgentService:
         config_path = os.getenv("DEER_FLOW_CONFIG_PATH") or os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "config.yaml"))
         if os.path.exists(config_path):
             try:
-                load_config(config_path=config_path)
+                reload_app_config(config_path=config_path)
                 logger.info(f"DeerFlow configuration loaded from {config_path}")
             except Exception as e:
                 logger.error(f"Failed to load DeerFlow configuration from {config_path}: {str(e)}")
