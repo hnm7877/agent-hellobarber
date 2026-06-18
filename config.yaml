@@ -1,0 +1,10 @@
+config_version: 6
+
+models:
+  - name: llama3.2:latest
+    use: langchain_ollama:ChatOllama
+    model: llama3.2:latest
+    base_url: http://127.0.0.1:11434
+
+sandbox:
+  use: deerflow.sandbox.local:LocalSandboxProvider
