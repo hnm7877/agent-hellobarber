@@ -1,49 +1,31 @@
 import httpx
-try:
-    from langchain_ollama import ChatOllama
-except ImportError:
-    try:
-        from langchain_community.chat_models import ChatOllama
-    except ImportError:
-        class ChatOllama:
-            def __init__(self, **kwargs):
-                pass
+import logging
+
+import os
+from langchain_core.tools import tool
 
 try:
-    from langchain_core.runnables import RunnableConfig
-    from langchain_core.tools import tool
+    from deerflow.config import load_config  # type: ignore
+    from deerflow.client import DeerFlowClient  # type: ignore
 except ImportError:
-    def tool(func):
-        return func
-    class RunnableConfig(dict):
-        pass
+    load_config = None
+    DeerFlowClient = None
 
-try:
-    from deerflow.agents import create_deerflow_agent, RuntimeFeatures
-except ImportError:
-    def create_deerflow_agent(*args, **kwargs):
-        class DummyAgent:
-            async def ainvoke(self, *args, **kwargs):
-                return {"messages": [{"role": "assistant", "content": "DeerFlow Harness non disponible dans cet environnement."}]}
-        return DummyAgent()
-    class RuntimeFeatures:
-        def __init__(self, **kwargs):
-            pass
 
 from app.settings import get_settings
 
+logger = logging.getLogger(__name__)
 settings = get_settings()
 
 @tool
-def list_salons(config: RunnableConfig) -> str:
+def list_salons(latitude: float = None, longitude: float = None) -> str:
     """Affiche la liste de tous les salons de coiffure et de beauté disponibles sur la plateforme KOUP.
-    Utilisez cet outil pour répondre à des questions comme 'quels sont les salons disponibles ?' ou 'suggère-moi un salon coiffure'."""
-    configurable = config.get("configurable", {})
-    lat = configurable.get("latitude")
-    lng = configurable.get("longitude")
-    
-    if lat is not None and lng is not None:
-        url = f"{settings.nestjs_base_url}/salons/nearby?lat={lat}&lng={lng}&maxDistance=100000"
+    Utilisez cet outil pour répondre à des questions comme 'quels sont les salons disponibles ?' ou 'suggère-moi un salon coiffure'.
+    Arguments:
+      latitude: Latitude GPS du client (optionnel, pour trouver les salons à proximité).
+      longitude: Longitude GPS du client (optionnel, pour trouver les salons à proximité)."""
+    if latitude is not None and longitude is not None:
+        url = f"{settings.nestjs_base_url}/salons/nearby?lat={latitude}&lng={longitude}&maxDistance=100000"
     else:
         url = f"{settings.nestjs_base_url}/agent/salons"
         
@@ -69,17 +51,18 @@ def list_salons(config: RunnableConfig) -> str:
                     specialties = specialty_list
                 else:
                     specialties = ", ".join(str(s) for s in specialty_list)
-                lines.append(f"- ID: {salon_id} | {name} : Situé à {address} | Note : {rating}/5 | Catégories/Spécialités générales : {specialties} (Note: Ce ne sont pas des prestations réservables directement. Pour obtenir la liste réelle des prestations de ce salon et leurs tarifs, vous devez impérativement appeler get_salon_services).")
+                lines.append(f"- ID: {salon_id} | {name} : Situé à {address} | Note : {rating}/5 | Catégories/Spécialités générales : {specialties} (Note: Ce ne sont pas des prestations réservables directement. Pour obtenir les détails du salon, ses horaires, ses prestations réelles et ses produits, vous devez impérativement appeler get_salon_details).")
             return "\n".join(lines)
     except Exception as e:
         return f"Erreur de connexion au service d'administration : {str(e)}"
 
 
 @tool
-def list_my_appointments(config: RunnableConfig) -> str:
+def list_my_appointments(user_id: str) -> str:
     """Affiche la liste des rendez-vous (confirmés, passés, futurs) du client actuellement connecté.
-    Utilisez cet outil pour répondre à des questions comme 'quels sont mes rendez-vous ?' ou 'quand est mon prochain rendez-vous ?'."""
-    user_id = config.get("configurable", {}).get("user_id")
+    Utilisez cet outil pour répondre à des questions comme 'quels sont mes rendez-vous ?' ou 'quand est mon prochain rendez-vous ?'.
+    Arguments:
+      user_id: L'identifiant de l'utilisateur connecté."""
     if not user_id or user_id == "anonymous":
         return "Vous n'êtes pas connecté. Veuillez vous connecter pour voir vos rendez-vous."
     
@@ -108,52 +91,124 @@ def list_my_appointments(config: RunnableConfig) -> str:
 
 
 @tool
-def get_salon_services(salon_id: str) -> str:
-    """Affiche la liste des prestations de coiffure ou beauté disponibles (ID, nom, prix, durée) pour un salon spécifique.
-    Utilisez cet outil lorsqu'un utilisateur demande 'quelles sont les prestations de ce salon ?' ou exprime l'intention de réserver pour voir les services disponibles."""
+def get_salon_details(salon_id: str) -> str:
+    """Affiche les détails complets d'un salon (description, adresse, téléphone, horaires d'ouverture, prestations/services disponibles, collaborateurs/staff et produits vendus).
+    Utilisez cet outil lorsqu'un utilisateur demande des informations détaillées sur un salon, ses prestations, ses tarifs, son adresse, ses horaires, son staff ou ses produits."""
     import re
     if not salon_id or not re.match(r"^[0-9a-fA-F]{24}$", salon_id):
         return "Erreur : ID du salon invalide (doit être un identifiant unique de 24 caractères hexadécimaux). Utilisez d'abord list_salons pour trouver le bon ID."
         
-    url = f"{settings.nestjs_base_url}/salons/{salon_id}/detail"
+    detail_url = f"{settings.nestjs_base_url}/salons/{salon_id}/detail"
+    products_url = f"{settings.nestjs_base_url}/salons/{salon_id}/products"
     
     try:
         with httpx.Client() as client:
-            resp = client.get(url)
+            # 1. Fetch details, services, reviews, staff
+            resp = client.get(detail_url)
             if resp.status_code != 200:
                 return f"Erreur de récupération des détails du salon (code {resp.status_code})."
             data = resp.json()
-            services = data.get("services", [])
-            if not services or len(services) == 0:
-                return "Aucune prestation n'est disponible dans ce salon actuellement."
             
-            lines = []
-            for svc in services:
-                svc_id = svc.get("_id")
-                name = svc.get("name", "Prestation sans nom")
-                price = svc.get("price", 0)
-                duration = svc.get("minDurationUnits", svc.get("duration", 30))
-                lines.append(f"- ID: {svc_id} | {name} : Tarif : {price} FCFA | Durée : {duration} min")
-            return "\n".join(lines)
+            # 2. Fetch products
+            products = []
+            try:
+                prod_resp = client.get(products_url)
+                if prod_resp.status_code == 200:
+                    products = prod_resp.json()
+            except Exception:
+                pass
+            
+            salon = data.get("salon") or {}
+            services = data.get("services", [])
+            staff = data.get("staff", [])
+            
+            name = salon.get("name") or salon.get("salonName") or "Salon"
+            description = salon.get("description", "Aucune description.")
+            address = salon.get("address", "Adresse non spécifiée.")
+            phone = data.get("salonPhone") or salon.get("phone") or "Non spécifié."
+            
+            # Format opening hours
+            DAYS_FR = {1: "Lundi", 2: "Mardi", 3: "Mercredi", 4: "Jeudi", 5: "Vendredi", 6: "Samedi", 7: "Dimanche"}
+            hours_list = salon.get("weeklyOpeningHours", [])
+            hours_str = ""
+            if hours_list:
+                for h in hours_list:
+                    day_name = DAYS_FR.get(h.get("weekday"), f"Jour {h.get('weekday')}")
+                    if h.get("isOpen"):
+                        periods = ", ".join([f"{p.get('start')} à {p.get('end')}" for p in h.get("periods", [])])
+                        hours_str += f"- {day_name} : {periods}\n"
+                    else:
+                        hours_str += f"- {day_name} : Fermé\n"
+            else:
+                hours_str = "Non renseignés.\n"
+                
+            # Format services
+            services_str = ""
+            if services:
+                for s in services:
+                    svc_id = s.get("_id") or s.get("id")
+                    s_name = s.get("name", "Prestation")
+                    price = s.get("price", 0)
+                    duration = s.get("minDurationUnits", s.get("duration", 30))
+                    services_str += f"- ID: {svc_id} | {s_name} : {price} FCFA | {duration} min\n"
+            else:
+                services_str = "Aucune prestation disponible.\n"
+                
+            # Format products
+            products_str = ""
+            if products:
+                for p in products:
+                    p_name = p.get("name", "Produit")
+                    p_desc = p.get("description", "")
+                    p_price = p.get("price", 0)
+                    p_stock = p.get("stock", 0)
+                    desc_part = f" ({p_desc})" if p_desc else ""
+                    products_str += f"- {p_name}{desc_part} : {p_price} FCFA | Stock: {p_stock}\n"
+            else:
+                products_str = "Aucun produit en vente.\n"
+                
+            # Format staff
+            staff_str = ""
+            if staff:
+                for st in staff:
+                    st_name = st.get("name", "Collaborateur")
+                    st_specialties = ", ".join(st.get("specialties", []))
+                    spec_part = f" (Spécialités: {st_specialties})" if st_specialties else ""
+                    staff_str += f"- {st_name}{spec_part}\n"
+            else:
+                staff_str = "Aucun collaborateur renseigné.\n"
+                
+            # Combine everything
+            result = (
+                f"Détails du salon : {name}\n"
+                f"Description : {description}\n"
+                f"Adresse : {address}\n"
+                f"Téléphone : {phone}\n\n"
+                f"Horaires d'ouverture :\n{hours_str}\n"
+                f"Collaborateurs disponibles :\n{staff_str}\n"
+                f"Prestations de coiffure / beauté disponibles (utilisez ces IDs réels pour réserver) :\n{services_str}\n"
+                f"Produits disponibles :\n{products_str}"
+            )
+            return result
     except Exception as e:
-        return f"Erreur lors de la récupération des prestations : {str(e)}"
+        return f"Erreur lors de la récupération des détails du salon : {str(e)}"
 
 
 @tool
-def book_appointment(salon_id: str, service_id: str, appointment_date: str, config: RunnableConfig) -> str:
+def book_appointment(salon_id: str, service_id: str, appointment_date: str, user_id: str) -> str:
     """Réserve un rendez-vous (crée une réservation) pour le client actuellement connecté dans un salon pour une prestation à une date donnée.
     Arguments:
       salon_id: L'identifiant unique (ID) du salon.
       service_id: L'identifiant unique (ID) de la prestation.
       appointment_date: Date et heure du rendez-vous au format ISO 8601 (ex: '2026-06-18T17:00:00.000Z').
+      user_id: L'identifiant de l'utilisateur connecté.
     """
     import re
     if not salon_id or not re.match(r"^[0-9a-fA-F]{24}$", salon_id):
         return "Erreur : ID du salon invalide (doit être un identifiant unique de 24 caractères hexadécimaux). Utilisez d'abord list_salons pour trouver le bon ID."
     if not service_id or not re.match(r"^[0-9a-fA-F]{24}$", service_id):
-        return "Erreur : ID de la prestation (service_id) invalide (doit être un identifiant unique de 24 caractères hexadécimaux). Utilisez d'abord get_salon_services avec l'ID du salon pour obtenir la liste des prestations réelles et leurs identifiants."
+        return "Erreur : ID de la prestation (service_id) invalide (doit être un identifiant unique de 24 caractères hexadécimaux). Utilisez d'abord get_salon_details avec l'ID du salon pour obtenir la liste des prestations réelles et leurs identifiants."
         
-    user_id = config.get("configurable", {}).get("user_id")
     if not user_id or user_id == "anonymous":
         return "Vous devez être connecté pour réserver. Veuillez vous connecter dans l'application."
         
@@ -193,83 +248,88 @@ def book_appointment(salon_id: str, service_id: str, appointment_date: str, conf
 
 class KoraAgentService:
     def __init__(self):
-        # Configure model
-        self.model = ChatOllama(
-            model=settings.ollama_model,
-            base_url=settings.ollama_base_url,
-            timeout=settings.ollama_timeout,
-        )
-        
-        # System prompt
-        self.system_prompt = (
-            "Tu es Kora ✨, l'assistante beauté intelligente de KOUP.\n"
-            "Tu es un esprit de beauté africain premium, bienveillante, experte et raffinée.\n"
-            "Réponds toujours en français.\n"
-            "Sois concise, chaleureuse, utile et professionnelle.\n\n"
-            "CADRE STRICT D'INTERACTION ET RÈGLES DE CONTEXTE :\n"
-            "1. Rôle & Domaine Exclusif : Tu es une conseillère spécialisée uniquement en coiffure (afro, tresses, locks, etc.), barbering, onglerie, maquillage, soins de la peau, esthétique et bien-être. Tu ne dois JAMAIS répondre à des questions hors sujet. Si on te pose une question hors contexte, refuse poliment et réoriente immédiatement la discussion vers la beauté ou les prestations de salon.\n"
-            "2. Continuité & Fluidité : L'échange est continu. Utilise l'historique de la discussion pour comprendre les préoccupations passées de l'utilisateur et construire une réponse fluide sans te répéter ou redemander des détails déjà fournis.\n"
-            "3. Pas de détails techniques ni d'identifiants (RÈGLE ABSOLUE) : Ne montre JAMAIS d'identifiants techniques (comme les MongoDB ObjectIDs du type '6a21a0aad1efe8aa1c6a2e41', etc.) ou de noms de fonctions/outils internes à l'utilisateur. Toutes ces informations techniques doivent être utilisées en arrière-plan. Dans tes réponses textuelles, utilise exclusivement les noms compréhensibles par un client (ex: 'Barber La Main d'or', 'Prestation de tresses').\n"
-            "4. Utilise uniquement les données réelles (Pas d'invention) : Ne fabrique pas de salons, de tarifs, de prestations ou d'horaires. Attention : les 'spécialités' ou 'catégories' renvoyées par la liste des salons ne sont que des compétences générales et ne correspondent pas à des prestations réservables directement. Pour parler des prestations d'un salon ou tenter une réservation, tu dois impérativement appeler l'outil des prestations de ce salon pour obtenir sa liste réelle de prestations configurées (ex: 'Coupe classique', 'Métal detox'). Si un service demandé (ex: 'braids') ne figure pas dans cette liste réelle, explique gentiment au client que le salon ne le propose pas et liste-lui les prestations réellement disponibles dans ce salon.\n"
-            "5. Processus de Réservation : Quand l'utilisateur souhaite prendre un rendez-vous (ex: 'réserve pour moi', 'je veux prendre RDV'), tu dois :\n"
-            "   a. Identifier le salon choisi (utilise l'outil de liste des salons si nécessaire).\n"
-            "   b. Lister et vérifier les prestations de ce salon (utilise l'outil des prestations du salon) pour trouver la prestation correspondante.\n"
-            "   c. Confirmer le jour et l'heure souhaités par l'utilisateur.\n"
-            "   d. Exécuter la réservation (utilise l'outil de réservation de rendez-vous) avec la date formatée en ISO 8601 (ex: '2026-06-18T17:00:00.000Z'). Ne passe jamais d'ID vide ou fictif.\n"
-            "   e. Confirmer le succès de la réservation au client avec le prix final, la date et l'heure de manière naturelle et chaleureuse, sans mentionner d'ID."
-        )
-        
-        # Tools list
-        self.tools = [list_salons, list_my_appointments, get_salon_services, book_appointment]
-        
-        # Compile DeerFlow agent
-        self.agent = create_deerflow_agent(
-            model=self.model,
-            system_prompt=self.system_prompt,
-            tools=self.tools,
-            features=RuntimeFeatures(subagent=False, memory=True),
-            name="kora-beauty-agent",
-        )
+        if load_config is None or DeerFlowClient is None:
+            self.client = None
+            logger.error("DeerFlow Harness non disponible dans cet environnement (deerflow-kernel non installé).")
+            return
+
+        config_path = os.getenv("DEER_FLOW_CONFIG_PATH") or os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "config.yaml"))
+        if os.path.exists(config_path):
+            try:
+                load_config(config_path=config_path)
+                logger.info(f"DeerFlow configuration loaded from {config_path}")
+            except Exception as e:
+                logger.error(f"Failed to load DeerFlow configuration from {config_path}: {str(e)}")
+        else:
+            logger.warning(f"DeerFlow config file not found at {config_path}")
+
+        try:
+            self.client = DeerFlowClient()
+            logger.info("KoraAgentService initialized with DeerFlowClient.")
+        except Exception as e:
+            self.client = None
+            logger.error(f"Failed to initialize DeerFlowClient: {str(e)}")
 
     async def chat(self, messages: list, user_id: str, latitude: float = None, longitude: float = None) -> dict:
-        config = {
-            "configurable": {
-                "user_id": user_id,
-                "thread_id": f"kora-session-{user_id}",
-                "latitude": latitude,
-                "longitude": longitude,
+        if self.client is None:
+            return {
+                "model": settings.ollama_model,
+                "content": "Désolée, le moteur d'agent intelligent (DeerFlow) n'est pas disponible pour le moment.",
+                "done": True
             }
-        }
-        
-        # Format messages for langchain (role: user -> HumanMessage, assistant -> AIMessage)
-        formatted_messages = []
-        for msg in messages:
-            role = msg.get("role")
-            content = msg.get("content")
-            if role == "user":
-                formatted_messages.append({"role": "user", "content": content})
-            elif role == "assistant":
-                formatted_messages.append({"role": "assistant", "content": content})
-                
-        # Invoke agent graph
-        result = await self.agent.ainvoke(
-            {"messages": formatted_messages},
-            config=config
-        )
-        
-        # Extract response message
-        # result["messages"] contains the conversation state including tool calls and the final agent response
-        final_message = ""
-        for m in reversed(result.get("messages", [])):
-            if hasattr(m, "content") and m.content and m.type == "ai":
-                final_message = m.content
+
+        # Extraire le dernier message de l'utilisateur
+        user_message = ""
+        for msg in reversed(messages):
+            if msg.get("role") == "user":
+                user_message = msg.get("content", "")
                 break
-            elif isinstance(m, dict) and m.get("role") == "assistant" and m.get("content"):
-                final_message = m.get("content")
-                break
-                
-        return {
-            "model": settings.ollama_model,
-            "content": final_message or "Désolée, je n'ai pas pu formuler de réponse.",
-            "done": True
-        }
+
+        if not user_message:
+            user_message = "Bonjour"
+
+        # Injecter le contexte de localisation et d'identité de l'utilisateur
+        context_parts = [f"Utilisateur connecté : user_id={user_id}"]
+        if latitude is not None and longitude is not None:
+            context_parts.append(f"Localisation GPS : latitude={latitude}, longitude={longitude}")
+        context_msg = " | ".join(context_parts)
+        
+        full_message = f"[Contexte: {context_msg}]\n\n{user_message}"
+        thread_id = f"kora-session-{user_id}"
+
+        try:
+            result = await self.client.ainvoke(
+                thread_id=thread_id,
+                message=full_message,
+            )
+
+            # Extraire le texte de réponse du résultat LangGraph renvoyé par le client
+            response_text = ""
+            if isinstance(result, dict):
+                msgs = result.get("messages", [])
+                if msgs:
+                    last = msgs[-1]
+                    if hasattr(last, "content"):
+                        response_text = last.content
+                    elif isinstance(last, dict):
+                        response_text = last.get("content", "")
+            elif hasattr(result, "content"):
+                response_text = result.content
+
+            if not response_text:
+                response_text = str(result)
+
+            return {
+                "model": settings.ollama_model,
+                "content": response_text,
+                "done": True
+            }
+        except Exception as e:
+            logger.error("Erreur lors de l'appel à l'agent Kora via DeerFlowClient: %s", str(e), exc_info=True)
+            return {
+                "model": settings.ollama_model,
+                "content": f"Désolée, une erreur interne s'est produite lors de la génération. ({str(e)})",
+                "done": True
+            }
+
+

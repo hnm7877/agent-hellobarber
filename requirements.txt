@@ -6,5 +6,4 @@ pydantic==2.9.2
 pydantic-settings==2.5.2
 langchain-ollama>=0.2.0
 langchain-core>=0.3.0
-# deerflow (cloned or installed from local/git)
-# To install from local source if needed: pip install -e /path/to/deerflow
+deerflow-kernel[ollama]
