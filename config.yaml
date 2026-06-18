@@ -17,14 +17,21 @@ models:
     supports_thinking: false
     supports_vision: false
 
+sandbox:
+  use: deerflow.sandbox.local:LocalSandboxProvider
+
 tools:
   - name: list_salons
+    group: koup
     use: app.services.kora_agent:list_salons
   - name: list_my_appointments
+    group: koup
     use: app.services.kora_agent:list_my_appointments
   - name: get_salon_details
+    group: koup
     use: app.services.kora_agent:get_salon_details
   - name: book_appointment
+    group: koup
     use: app.services.kora_agent:book_appointment
   - name: web_search
     group: web
@@ -33,4 +40,3 @@ tools:
 
 tool_search:
   enabled: false
-
