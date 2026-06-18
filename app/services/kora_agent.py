@@ -298,26 +298,12 @@ class KoraAgentService:
         thread_id = f"kora-session-{user_id}"
 
         try:
-            result = await self.client.ainvoke(
-                thread_id=thread_id,
-                message=full_message,
+            import asyncio
+            response_text = await asyncio.to_thread(
+                self.client.chat,
+                full_message,
+                thread_id=thread_id
             )
-
-            # Extraire le texte de réponse du résultat LangGraph renvoyé par le client
-            response_text = ""
-            if isinstance(result, dict):
-                msgs = result.get("messages", [])
-                if msgs:
-                    last = msgs[-1]
-                    if hasattr(last, "content"):
-                        response_text = last.content
-                    elif isinstance(last, dict):
-                        response_text = last.get("content", "")
-            elif hasattr(result, "content"):
-                response_text = result.content
-
-            if not response_text:
-                response_text = str(result)
 
             return {
                 "model": settings.ollama_model,
@@ -325,7 +311,7 @@ class KoraAgentService:
                 "done": True
             }
         except Exception as e:
-            logger.error("Erreur lors de l'appel à l'agent Kora via DeerFlowClient: %s", str(e), exc_info=True)
+            logger.error("Erreur lors de l'appel à l'agent Kora via DeerFlowClient.chat: %s", str(e), exc_info=True)
             return {
                 "model": settings.ollama_model,
                 "content": f"Désolée, une erreur interne s'est produite lors de la génération. ({str(e)})",
