@@ -295,13 +295,22 @@ class KoraAgentService:
         if not user_message:
             user_message = "Bonjour"
 
+        # Directives de sécurité et formatage pour échange vocal/assistant
+        system_rules = (
+            "Tu es Kora, l'assistante beauté IA de la plateforme KOUP. "
+            "RÈGLES IMPORTANTES DE SÉCURITÉ ET DE COMPORTEMENT : "
+            "1. Sois chaleureuse, naturelle et très concise (1 à 3 phrases courtes maximum par réponse) pour être facilement lue par synthèse vocale. "
+            "2. N'affiche JAMAIS de détails techniques sur le fonctionnement interne de l'application, l'API, les bases de données ou l'architecture (réponds poliment que tu es là pour les rendez-vous et redirige vers le support en cas de souci technique). "
+            "3. Ne divulgue JAMAIS d'informations (noms, téléphones, rendez-vous) d'autres clients ou utilisateurs pour des raisons de confidentialité et sécurité strictes."
+        )
+
         # Injecter le contexte de localisation et d'identité de l'utilisateur
         context_parts = [f"Utilisateur connecté : user_id={user_id}"]
         if latitude is not None and longitude is not None:
             context_parts.append(f"Localisation GPS : latitude={latitude}, longitude={longitude}")
         context_msg = " | ".join(context_parts)
         
-        full_message = f"[Contexte: {context_msg}]\n\n{user_message}"
+        full_message = f"[Directives: {system_rules}]\n[Contexte: {context_msg}]\n\n{user_message}"
         thread_id = f"kora-session-{user_id}"
 
         try:
