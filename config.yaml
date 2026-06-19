@@ -33,6 +33,21 @@ tools:
   - name: book_appointment
     group: koup
     use: app.services.kora_agent:book_appointment
+  - name: reschedule_appointment
+    group: koup
+    use: app.services.kora_agent:reschedule_appointment
+  - name: cancel_appointment
+    group: koup
+    use: app.services.kora_agent:cancel_appointment
+  - name: get_available_slots
+    group: koup
+    use: app.services.kora_agent:get_available_slots
+  - name: search_marketplace_products
+    group: koup
+    use: app.services.kora_agent:search_marketplace_products
+  - name: search_salons_by_service
+    group: koup
+    use: app.services.kora_agent:search_salons_by_service
   - name: web_search
     group: web
     use: deerflow.community.ddg_search.tools:web_search_tool

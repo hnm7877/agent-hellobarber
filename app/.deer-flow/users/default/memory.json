@@ -1,0 +1,67 @@
+{
+  "version": "1.0",
+  "lastUpdated": "2026-06-19T01:03:56.024844Z",
+  "user": {
+    "workContext": {
+      "summary": "Assistante beauté IA de la plateforme KOUP, spécialisée dans les recommandations de salons, prestations et rendez-vous. Priorise la communication claire et rapide avec des réponses concises et dynamiques.",
+      "updatedAt": "2026-06-19T01:03:42.910576Z"
+    },
+    "personalContext": {
+      "summary": "Préfère les interactions chaleureuses, dynamiques et concises (1-3 phrases courtes). Utilise des émoticônes (✨, 💈, 📅) et des puces scintillantes pour structurer les réponses. Maîtrise le français et les contraintes de sécurité liés aux données clients.",
+      "updatedAt": "2026-06-19T01:03:42.910576Z"
+    },
+    "topOfMind": {
+      "summary": "Optimisation des interactions utilisateur sur la plateforme KOUP : - Gestion des disponibilités des prestations (ex: coupes de cheveux) - Mise à jour des disponibilités en temps réel - Respect strict des règles de sécurité (non affichage d'IDs techniques) - Personalisation des recommandations basées sur les préférences des utilisateurs - Amélioration de l'expérience vocale via des choix numérotés (ex: '1. Moya delux, 2. Salon Alliance...') - Résolution des erreurs de validation des IDs de salons (24 caractères hexadécimaux requis) - Confirmation des réservations (ex: 25 juin à 11h)",
+      "updatedAt": "2026-06-19T01:03:56.018761Z"
+    }
+  },
+  "history": {
+    "recentMonths": {
+      "summary": "Dernières interactions : - Correction de la disponibilité de 'Fade Barbers Texturé' → 'Coupe classique' disponible ✨ - Présentation de salons avec localisation (Adresse non spécifiée, 8.2 km) - Gestion d'offres gratuites (0 FCFA) - Réservation à confirmer pour le 25 juin à 11h 📅 - Encounter d'erreur de validation : L'ID du salon 'inconnu' n'est pas valide (doit être un code de 24 caractères hexadécimaux). Pour confirmer la réservation, il faut vérifier le bon ID du salon.",
+      "updatedAt": "2026-06-19T01:03:56.018761Z"
+    },
+    "earlierContext": {
+      "summary": "",
+      "updatedAt": ""
+    },
+    "longTermBackground": {
+      "summary": "",
+      "updatedAt": ""
+    }
+  },
+  "facts": [
+    {
+      "id": "fact_31d9e912",
+      "content": "Gestion de disponibilités en temps réel pour les prestations (ex: coupes de cheveux) et salons.",
+      "category": "knowledge",
+      "confidence": 0.95,
+      "createdAt": "2026-06-19T01:03:42.910576Z",
+      "source": "kora-session-65f1a234b56789c012345678"
+    },
+    {
+      "id": "fact_2286f32d",
+      "content": "Erreur de validation : L'ID du salon 'inconnu' n'est pas valide (doit être un code de 24 caractères hexadécimaux). Pour confirmer la réservation, il faut vérifier le bon ID du salon.",
+      "category": "correction",
+      "confidence": 0.98,
+      "createdAt": "2026-06-19T01:03:56.018761Z",
+      "source": "kora-session-65f1a234b56789c012345678",
+      "sourceError": "L'ID du salon 'inconnu' était montré comme 'Situé à Adresse non spécifiée (8.2 km)' mais n'est pas un code de 24 caractères hexadécimaux valide."
+    },
+    {
+      "id": "fact_b0c34776",
+      "content": "Contrainte technique : Les IDs de salons doivent être des codes de 24 caractères hexadécimaux (format : xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx).",
+      "category": "knowledge",
+      "confidence": 0.95,
+      "createdAt": "2026-06-19T01:03:56.018761Z",
+      "source": "kora-session-65f1a234b56789c012345678"
+    },
+    {
+      "id": "fact_0077feae",
+      "content": "Tentative de confirmation de réservation pour le 25 juin à 11h pour le service 'Coupe classique' (30 min) à 0 FCFA.",
+      "category": "behavior",
+      "confidence": 0.92,
+      "createdAt": "2026-06-19T01:03:56.018761Z",
+      "source": "kora-session-65f1a234b56789c012345678"
+    }
+  ]
+}

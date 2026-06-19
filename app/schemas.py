@@ -12,6 +12,7 @@ class ChatRequest(BaseModel):
     userId: str
     latitude: Optional[float] = None
     longitude: Optional[float] = None
+    clientContext: Optional[str] = None
     model: Optional[str] = None
     stream: bool = False
     temperature: Optional[float] = None
@@ -21,3 +22,4 @@ class ChatResponse(BaseModel):
     model: str
     content: str
     done: bool
+    actionPerformed: Optional[str] = None

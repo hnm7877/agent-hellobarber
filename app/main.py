@@ -52,10 +52,12 @@ async def chat(request: ChatRequest):
         user_id=request.userId,
         latitude=request.latitude,
         longitude=request.longitude,
+        client_context=request.clientContext,
     )
     
     return ChatResponse(
         model=result.get("model", settings.ollama_model),
         content=result.get("content", ""),
         done=result.get("done", True),
+        actionPerformed=result.get("actionPerformed", None),
     )

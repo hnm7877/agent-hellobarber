@@ -1,0 +1,421 @@
+{
+  "version": "1.0",
+  "lastUpdated": "2026-06-19T01:13:52.104083Z",
+  "user": {
+    "workContext": {
+      "summary": "Utilisateur connecté à KOUP, gère ses rendez‑vous beauté et recherche des recommandations produits, réside à San Francisco et s’intéresse aux coiffures locks et à l’entretien des cheveux bouclés.",
+      "updatedAt": "2026-06-19T00:01:29.464564Z"
+    },
+    "personalContext": {
+      "summary": "Communique en français, réside à San Francisco, passionné par les locks et l’entretien des cheveux bouclés.",
+      "updatedAt": "2026-06-19T00:01:29.464564Z"
+    },
+    "topOfMind": {
+      "summary": "1) Confirmation du rendez-vous du 25 juin 2026 à 11h au Barber Shop 2 Arts. 2) Obtention d'une liste de salons locaux vendant des produits pour locks sans exposer d'IDs techniques. 3) Recommandations de produits spécifiques pour locks (shampooing sans sulfate, après-shampoing hydratant, huile de jojoba/argan). 4) Exploration de styles barber texturés adaptés aux locks.",
+      "updatedAt": "2026-06-19T00:58:17.214567Z"
+    }
+  },
+  "history": {
+    "recentMonths": {
+      "summary": "Au cours du dernier échange, l'utilisateur a confirmé son rendez‑vous au Barber Shop 2 Arts pour le 25 juin 2026 à 11 h. L'assistante Kora a proposé un style « Fade texturé & Locks‑fusion » pour les locks, recommandé des produits sans sulfate, et a présenté une liste de deux salons avec leurs adresses, tout en affichant les identifiants internes (salon_id, appointment_id), ce qui viole la règle de confidentialité. L'utilisateur continue de solliciter une liste de salons locaux sans exposition d'IDs et des recommandations de produits, tout en recherchant des styles barber texturés adaptés aux locks.",
+      "updatedAt": "2026-06-19T01:13:52.088992Z"
+    },
+    "earlierContext": {
+      "summary": "",
+      "updatedAt": ""
+    },
+    "longTermBackground": {
+      "summary": "User's foundational context includes participation in KOUP's beauty service ecosystem with emphasis on privacy and concise communication.",
+      "updatedAt": "2026-06-18T22:06:53.319417Z"
+    }
+  },
+  "facts": [
+    {
+      "id": "fact_bb9c504b",
+      "content": "User requires style recommendation under KOUP's Kora assistant with strict privacy rules (no disclosure of others' information)",
+      "category": "context",
+      "confidence": 0.98,
+      "createdAt": "2026-06-18T22:06:53.319417Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_0a512bc8",
+      "content": "User explicitly requested personalized style advice requiring hair type and ambiance preferences",
+      "category": "goal",
+      "confidence": 0.95,
+      "createdAt": "2026-06-18T22:06:53.319417Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_ec39a93a",
+      "content": "KOUP's Kora assistant must maintain concise responses (1-3 sentences) for voice synthesis compatibility",
+      "category": "constraint",
+      "confidence": 0.99,
+      "createdAt": "2026-06-18T22:06:53.319417Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_cd41c73f",
+      "content": "User's location is San Francisco (latitude=37.4219983, longitude=-122.084)",
+      "category": "context",
+      "confidence": 0.97,
+      "createdAt": "2026-06-18T22:06:53.319417Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_20e83269",
+      "content": "User prefers barber-style haircuts with short, clean finishes and structured cuts",
+      "category": "preference",
+      "confidence": 0.9,
+      "createdAt": "2026-06-18T22:13:17.601539Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_c658091a",
+      "content": "User has history of barber appointments indicating preference for professional grooming services",
+      "category": "context",
+      "confidence": 0.85,
+      "createdAt": "2026-06-18T22:13:17.601539Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_df5cd70e",
+      "content": "User is open to textured fade styles with natural finish as alternative to established barber preferences",
+      "category": "preference",
+      "confidence": 0.85,
+      "createdAt": "2026-06-18T22:13:17.601539Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_1dc04006",
+      "content": "Assistant inferred user personality as organized and demanding based on preference for structured barber-style cuts",
+      "category": "behavior",
+      "confidence": 0.8,
+      "createdAt": "2026-06-18T22:13:17.601539Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_c557ec51",
+      "content": "User is open to textured fade styles with natural finish as alternative to barber preferences",
+      "category": "preference",
+      "confidence": 0.85,
+      "createdAt": "2026-06-18T22:16:54.815635Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_2df7c10e",
+      "content": "User communicates in French and is comfortable with French-language interactions",
+      "category": "context",
+      "confidence": 0.95,
+      "createdAt": "2026-06-18T22:23:25.779189Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_9571b619",
+      "content": "Assistant cannot generate hairstyle images; user requested image generation for hairstyle visualization",
+      "category": "correction",
+      "confidence": 0.95,
+      "createdAt": "2026-06-18T22:23:25.779189Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a",
+      "sourceError": "User expected image generation capability for hairstyle visualization"
+    },
+    {
+      "id": "fact_39a59324",
+      "content": "User expressed interest in locks hairstyle.",
+      "category": "preference",
+      "confidence": 0.9,
+      "createdAt": "2026-06-18T22:25:05.899381Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_b831f65b",
+      "content": "User wants to schedule a haircut for locks.",
+      "category": "goal",
+      "confidence": 0.9,
+      "createdAt": "2026-06-18T22:25:05.899381Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_1977f100",
+      "content": "User requested personality analysis to understand their style preferences.",
+      "category": "goal",
+      "confidence": 0.9,
+      "createdAt": "2026-06-18T22:25:05.899381Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_a6fc236b",
+      "content": "User seeks product recommendations for maintaining locks, specifically shampoo sans sulfate, après‑shampoing hydratant et huile de jojoba ou d'argan.",
+      "category": "preference",
+      "confidence": 0.95,
+      "createdAt": "2026-06-18T22:26:37.910981Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_70078845",
+      "content": "User requests list of nearby salons that sell lock‑care products and their contact information.",
+      "category": "goal",
+      "confidence": 0.95,
+      "createdAt": "2026-06-18T22:26:37.910981Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_fe5172b0",
+      "content": "User continues to be interested in scheduling a haircut for locks.",
+      "category": "goal",
+      "confidence": 0.9,
+      "createdAt": "2026-06-18T22:26:37.910981Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_f7bff2c1",
+      "content": "Utilisateur souhaite obtenir une liste de salons locaux vendant des produits d’entretien pour locks, avec coordonnées de contact.",
+      "category": "goal",
+      "confidence": 0.99,
+      "createdAt": "2026-06-18T22:42:27.309131Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_ba027c3e",
+      "content": "Utilisateur demande des recommandations de produits pour locks : shampooing sans sulfate, après‑shampoing hydratant et huile de jojoba ou d'argan.",
+      "category": "goal",
+      "confidence": 0.99,
+      "createdAt": "2026-06-18T22:42:27.309131Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_d3c5e9a4",
+      "content": "Utilisateur préfère les styles barber soignés et des dégradés texturés adaptés aux locks.",
+      "category": "preference",
+      "confidence": 0.95,
+      "createdAt": "2026-06-18T22:42:27.309131Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_5e00f50c",
+      "content": "Assistant a commis une erreur en prétendant pouvoir générer des images de coiffure, ce qui a été corrigé par l'annonce de son incapacité.",
+      "category": "correction",
+      "confidence": 0.98,
+      "createdAt": "2026-06-18T22:42:27.309131Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a",
+      "sourceError": "User expected image generation capability for hairstyle visualization"
+    },
+    {
+      "id": "fact_2d93c026",
+      "content": "L'utilisateur demande une liste de salons locaux vendant des produits d’entretien pour locks, avec coordonnées de contact.",
+      "category": "goal",
+      "confidence": 1.0,
+      "createdAt": "2026-06-18T22:43:47.347111Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_e9564be3",
+      "content": "L'utilisateur souhaite obtenir une liste détaillée des salons locaux vendant des produits d’entretien pour locks avec coordonnées, ainsi que des recommandations de produits spécifiques.",
+      "category": "goal",
+      "confidence": 0.95,
+      "createdAt": "2026-06-18T23:09:13.850016Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_252fcd37",
+      "content": "Salon Locks & Co (ID 8c4d9e0f1a2b3c4d5e6f7g8h) 456 Castro St vend des produits d’entretien pour locks.",
+      "category": "context",
+      "confidence": 0.99,
+      "createdAt": "2026-06-18T23:18:37.453977Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_8ed2010b",
+      "content": "Produit recommandé : Pure Locks Sulfate‑Free Shampoo (shampoing sans sulfate).",
+      "category": "knowledge",
+      "confidence": 0.99,
+      "createdAt": "2026-06-18T23:18:37.453977Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_7846bd67",
+      "content": "Produit recommandé : Hydra‑Lock Leave‑In Conditioner (après‑shampoing hydratant).",
+      "category": "knowledge",
+      "confidence": 0.99,
+      "createdAt": "2026-06-18T23:18:37.453977Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_d37b398d",
+      "content": "Produit recommandé : Jojoba‑Argan Blend Oil (huile mélange jojoba et argan).",
+      "category": "knowledge",
+      "confidence": 0.99,
+      "createdAt": "2026-06-18T23:18:37.453977Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_7008cb78",
+      "content": "L'assistant a affiché des identifiants techniques (IDs de salon, rendez‑vous) dans la réponse, violant la règle de ne jamais exposer ces IDs au client.",
+      "category": "correction",
+      "confidence": 0.98,
+      "createdAt": "2026-06-18T23:24:49.076279Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a",
+      "sourceError": "Agent displayed internal IDs in user‑facing text."
+    },
+    {
+      "id": "fact_6da06b34",
+      "content": "L'assistant a affiché des identifiants techniques (salon_id, appointment_id) dans la réponse concernant les rendez‑vous, violant la règle de ne jamais exposer ces IDs au client.",
+      "category": "correction",
+      "confidence": 0.98,
+      "createdAt": "2026-06-18T23:25:42.269557Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a",
+      "sourceError": "Agent displayed internal IDs in user‑facing text."
+    },
+    {
+      "id": "fact_317afd82",
+      "content": "Assistant a affiché des identifiants techniques (salon_id, appointment_id) dans la réponse concernant le changement d'horaire du rendez‑vous, violant la règle de ne jamais exposer ces IDs au client.",
+      "category": "correction",
+      "confidence": 0.98,
+      "createdAt": "2026-06-18T23:27:03.546589Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a",
+      "sourceError": "Agent displayed internal IDs in user‑facing text."
+    },
+    {
+      "id": "fact_1b263575",
+      "content": "User’s appointment at Barber Shop 2 Arts confirmed for 2026‑06‑25 11:00.",
+      "category": "goal",
+      "confidence": 0.99,
+      "createdAt": "2026-06-18T23:28:19.661069Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_da26a2fe",
+      "content": "Assistant incorrectly displayed internal IDs (salon_id, appointment_id) in user-facing text.",
+      "category": "correction",
+      "confidence": 0.98,
+      "createdAt": "2026-06-18T23:28:19.661069Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a",
+      "sourceError": "Agent displayed internal IDs in user‑facing text."
+    },
+    {
+      "id": "fact_c5bb50f0",
+      "content": "Assistant incorrectly provided the appointment date as 2026‑06‑19 instead of the reprogrammed 2026‑06‑25.",
+      "category": "correction",
+      "confidence": 0.98,
+      "createdAt": "2026-06-18T23:28:19.661069Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a",
+      "sourceError": "Agent provided wrong appointment date."
+    },
+    {
+      "id": "fact_bae45493",
+      "content": "Barber Shop 2 Arts is not found in the KOUP salon directory, indicating the establishment may be external to the platform or its address is unknown.",
+      "category": "correction",
+      "confidence": 0.97,
+      "createdAt": "2026-06-18T23:28:19.661069Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_27a02f41",
+      "content": "User explicitly requested a list of nearby salons that sell lock‑care products with contact information.",
+      "category": "goal",
+      "confidence": 0.99,
+      "createdAt": "2026-06-19T00:01:29.464564Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_fb050778",
+      "content": "User wants product recommendations for locks: sulfate‑free shampoo, moisturizing conditioner, jojoba or argan oil.",
+      "category": "knowledge",
+      "confidence": 0.99,
+      "createdAt": "2026-06-19T00:01:29.464564Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_520d43db",
+      "content": "User confirmed appointment at Barber Shop 2 Arts for 25 June 2026 at 11:00.",
+      "category": "goal",
+      "confidence": 0.99,
+      "createdAt": "2026-06-19T00:01:29.464564Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_31b23985",
+      "content": "Assistant displayed internal IDs (e.g., salon_id) in user‑facing response, violating privacy rule.",
+      "category": "correction",
+      "confidence": 0.98,
+      "createdAt": "2026-06-19T00:01:29.464564Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a",
+      "sourceError": "Assistant displayed internal IDs in user‑facing text."
+    },
+    {
+      "id": "fact_93126911",
+      "content": "User communicates in French and prefers French‑language interactions.",
+      "category": "context",
+      "confidence": 0.95,
+      "createdAt": "2026-06-19T00:01:29.464564Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_f0379936",
+      "content": "L'assistant a exposé des identifiants techniques (ex: salon_id, appointment_id) dans la réponse, violant la règle de ne jamais exposer ces IDs au client.",
+      "category": "correction",
+      "confidence": 0.99,
+      "createdAt": "2026-06-19T00:55:24.068674Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a",
+      "sourceError": "Agent displayed internal IDs in user-facing text"
+    },
+    {
+      "id": "fact_4c81629c",
+      "content": "Assistant a exposé des identifiants techniques (salon_id, appointment_id) dans la réponse, violant la règle de ne jamais exposer ces IDs au client.",
+      "category": "correction",
+      "confidence": 0.99,
+      "createdAt": "2026-06-19T00:58:17.214567Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a",
+      "sourceError": "Agent displayed internal IDs in user-facing text"
+    },
+    {
+      "id": "fact_141c2e15",
+      "content": "Utilisateur a confirmé son rendez-vous au Barber Shop 2 Arts pour le 25 juin 2026 à 11h.",
+      "category": "goal",
+      "confidence": 0.99,
+      "createdAt": "2026-06-19T00:58:17.214567Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_5ad99be4",
+      "content": "Assistant a proposé un style 'Fade Barbers Texturé' adapté aux locks, en alignement avec les préférences de l'utilisateur.",
+      "category": "preference",
+      "confidence": 0.95,
+      "createdAt": "2026-06-19T00:58:17.214567Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_54add08d",
+      "content": "Utilisateur a exprimé un intérêt pour des produits spécifiques : shampooing sans sulfate, après-shampoing hydratant, huile de jojoba ou d'argan.",
+      "category": "preference",
+      "confidence": 0.95,
+      "createdAt": "2026-06-19T00:58:17.214567Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_dc2babfa",
+      "content": "Assistant suggested style 'Fade texturé & Locks‑fusion' for locks.",
+      "category": "preference",
+      "confidence": 0.95,
+      "createdAt": "2026-06-19T01:13:52.088992Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_bb6953d1",
+      "content": "Assistant displayed internal IDs (salon_id, appointment_id) in user‑facing response, violating privacy rule.",
+      "category": "correction",
+      "confidence": 0.98,
+      "createdAt": "2026-06-19T01:13:52.088992Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a",
+      "sourceError": "Agent displayed internal IDs in user‑facing text."
+    },
+    {
+      "id": "fact_cbb20b30",
+      "content": "User communicates in French.",
+      "category": "context",
+      "confidence": 0.95,
+      "createdAt": "2026-06-19T01:13:52.088992Z",
+      "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    }
+  ]
+}
