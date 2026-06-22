@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-06-19T01:13:52.104083Z",
+  "lastUpdated": "2026-06-22T22:08:00.672490Z",
   "user": {
     "workContext": {
       "summary": "Utilisateur connecté à KOUP, gère ses rendez‑vous beauté et recherche des recommandations produits, réside à San Francisco et s’intéresse aux coiffures locks et à l’entretien des cheveux bouclés.",
@@ -11,14 +11,14 @@
       "updatedAt": "2026-06-19T00:01:29.464564Z"
     },
     "topOfMind": {
-      "summary": "1) Confirmation du rendez-vous du 25 juin 2026 à 11h au Barber Shop 2 Arts. 2) Obtention d'une liste de salons locaux vendant des produits pour locks sans exposer d'IDs techniques. 3) Recommandations de produits spécifiques pour locks (shampooing sans sulfate, après-shampoing hydratant, huile de jojoba/argan). 4) Exploration de styles barber texturés adaptés aux locks.",
-      "updatedAt": "2026-06-19T00:58:17.214567Z"
+      "summary": "1) Confirmation du rendez‑vous du 25 juin 2026 à 11 h au Barber Shop 2 Arts. 2) Liste de salons locaux vendant des produits pour locks. 3) Recommandations de produits spécifiques (shampooing sans sulfate, après‑shampoing hydratant, huile jojoba/argan). 4) Exploration de styles barber texturés adaptés aux locks. 5) Vérification d'éventuels créneaux supplémentaires le 25 juin.",
+      "updatedAt": "2026-06-22T22:06:52.552957Z"
     }
   },
   "history": {
     "recentMonths": {
-      "summary": "Au cours du dernier échange, l'utilisateur a confirmé son rendez‑vous au Barber Shop 2 Arts pour le 25 juin 2026 à 11 h. L'assistante Kora a proposé un style « Fade texturé & Locks‑fusion » pour les locks, recommandé des produits sans sulfate, et a présenté une liste de deux salons avec leurs adresses, tout en affichant les identifiants internes (salon_id, appointment_id), ce qui viole la règle de confidentialité. L'utilisateur continue de solliciter une liste de salons locaux sans exposition d'IDs et des recommandations de produits, tout en recherchant des styles barber texturés adaptés aux locks.",
-      "updatedAt": "2026-06-19T01:13:52.088992Z"
+      "summary": "Le 22 juin 2026, l'assistante Kora a confirmé le rendez‑vous du 25 juin au Barber Shop 2 Arts, fourni deux salons proches (Locks & Co, Urban Locks Boutique) avec coordonnées, et recommandé trois produits pour locks. Elle a suggéré des styles barber texturés compatibles avec les locks et a proposé de vérifier un créneau supplémentaire le 25 juin. Aucun problème d'affichage d'identifiants techniques n'a été constaté.",
+      "updatedAt": "2026-06-22T22:06:52.552957Z"
     },
     "earlierContext": {
       "summary": "",
@@ -26,7 +26,7 @@
     },
     "longTermBackground": {
       "summary": "User's foundational context includes participation in KOUP's beauty service ecosystem with emphasis on privacy and concise communication.",
-      "updatedAt": "2026-06-18T22:06:53.319417Z"
+      "updatedAt": "2026-06-22T21:34:24.293550Z"
     }
   },
   "facts": [
@@ -416,6 +416,95 @@
       "confidence": 0.95,
       "createdAt": "2026-06-19T01:13:52.088992Z",
       "source": "kora-session-6a0ee9a7f7a3f8b4812b4d7a"
+    },
+    {
+      "id": "fact_480923bf",
+      "content": "Utilisateur demande une liste de salons locaux vendant des produits d’entretien pour locks, avec coordonnées de contact.",
+      "category": "goal",
+      "confidence": 1.0,
+      "createdAt": "2026-06-22T21:34:24.293550Z",
+      "source": "kora-session-69eeeea687d14b77044c8b73"
+    },
+    {
+      "id": "fact_77bb7515",
+      "content": "Utilisateur préfère les styles barber texturés adaptés aux locks.",
+      "category": "preference",
+      "confidence": 0.95,
+      "createdAt": "2026-06-22T21:34:24.293550Z",
+      "source": "kora-session-69eeeea687d14b77044c8b73"
+    },
+    {
+      "id": "fact_8a45c00f",
+      "content": "Utilisateur recherche des produits spécifiques : shampooing sans sulfate, après-shampoing hydratant, huile de jojoba ou d'argan.",
+      "category": "preference",
+      "confidence": 0.95,
+      "createdAt": "2026-06-22T21:34:24.293550Z",
+      "source": "kora-session-69eeeea687d14b77044c8b73"
+    },
+    {
+      "id": "fact_a747e744",
+      "content": "Assistant a exposé des identifiants techniques (salon_id, appointment_id) dans la réponse, violant la règle de confidentialité.",
+      "category": "correction",
+      "confidence": 0.98,
+      "createdAt": "2026-06-22T21:34:24.293550Z",
+      "source": "kora-session-69eeeea687d14b77044c8b73",
+      "sourceError": "Agent displayed internal IDs in user-facing text"
+    },
+    {
+      "id": "fact_ea999511",
+      "content": "Assistant a recommandé un style 'Fade texturé & Locks-fusion' pour les locks.",
+      "category": "preference",
+      "confidence": 0.95,
+      "createdAt": "2026-06-22T21:34:24.293550Z",
+      "source": "kora-session-69eeeea687d14b77044c8b73"
+    },
+    {
+      "id": "fact_4ebca5eb",
+      "content": "Utilisateur exprime un intérêt pour des produits spécifiques : shampooing sans sulfate, après-shampoing hydratant et huile de jojoba ou d'argan.",
+      "category": "knowledge",
+      "confidence": 0.99,
+      "createdAt": "2026-06-22T21:34:24.293550Z",
+      "source": "kora-session-69eeeea687d14b77044c8b73"
+    },
+    {
+      "id": "fact_1545676e",
+      "content": "Utilisateur a confirmé son rendez-vous pour le 25 juin 2026 à 11h.",
+      "category": "goal",
+      "confidence": 0.99,
+      "createdAt": "2026-06-22T21:34:24.293550Z",
+      "source": "kora-session-69eeeea687d14b77044c8b73"
+    },
+    {
+      "id": "fact_b5102214",
+      "content": "Barber Versailles a eu 2 rendez‑vous le 22 juin 2026 (1 complété, 1 annulé), CA de 130 FCFA, stock OK (0 alerte).",
+      "category": "knowledge",
+      "confidence": 0.95,
+      "createdAt": "2026-06-22T21:37:39.356939Z",
+      "source": "kora-session-6a0fdf7c005a5ff7d1a66279"
+    },
+    {
+      "id": "fact_bd29027b",
+      "content": "User expressed interest in checking available slots for June 25 or obtaining products for locks after confirming appointment.",
+      "category": "goal",
+      "confidence": 0.95,
+      "createdAt": "2026-06-22T21:44:47.636715Z",
+      "source": "kora-session-6a0fdf7c005a5ff7d1a66279"
+    },
+    {
+      "id": "fact_ad531777",
+      "content": "Barber Versailles had 2 appointments on June 22, 2026 (1 completed, 1 canceled) with 130 FCFA revenue and normal stock levels.",
+      "category": "knowledge",
+      "confidence": 0.95,
+      "createdAt": "2026-06-22T21:44:47.636715Z",
+      "source": "kora-session-6a0fdf7c005a5ff7d1a66279"
+    },
+    {
+      "id": "fact_e6908adf",
+      "content": "User souhaite éventuellement un créneau supplémentaire le 25 juin 2026 pour un autre service.",
+      "category": "goal",
+      "confidence": 0.9,
+      "createdAt": "2026-06-22T22:06:52.552957Z",
+      "source": "kora-session-6a0fdf7c005a5ff7d1a66279"
     }
   ]
 }

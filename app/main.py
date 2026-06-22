@@ -53,6 +53,8 @@ async def chat(request: ChatRequest):
         latitude=request.latitude,
         longitude=request.longitude,
         client_context=request.clientContext,
+        role=request.role,
+        salon_id=request.salonId,
     )
     
     return ChatResponse(
@@ -61,3 +63,4 @@ async def chat(request: ChatRequest):
         done=result.get("done", True),
         actionPerformed=result.get("actionPerformed", None),
     )
+

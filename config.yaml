@@ -48,6 +48,18 @@ tools:
   - name: search_salons_by_service
     group: koup
     use: app.services.kora_agent:search_salons_by_service
+  - name: list_salon_appointments
+    group: koup_pro
+    use: app.services.kora_agent:list_salon_appointments
+  - name: get_pro_dashboard_summary
+    group: koup_pro
+    use: app.services.kora_agent:get_pro_dashboard_summary
+  - name: get_low_stock_products
+    group: koup_pro
+    use: app.services.kora_agent:get_low_stock_products
+  - name: get_salon_analytics
+    group: koup_pro
+    use: app.services.kora_agent:get_salon_analytics
   - name: web_search
     group: web
     use: deerflow.community.ddg_search.tools:web_search_tool
@@ -55,3 +67,4 @@ tools:
 
 tool_search:
   enabled: false
+

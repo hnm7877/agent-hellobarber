@@ -13,9 +13,12 @@ class ChatRequest(BaseModel):
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     clientContext: Optional[str] = None
+    role: Optional[str] = "client"
+    salonId: Optional[str] = None
     model: Optional[str] = None
     stream: bool = False
     temperature: Optional[float] = None
+
 
 
 class ChatResponse(BaseModel):

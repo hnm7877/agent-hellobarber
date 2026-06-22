@@ -457,11 +457,200 @@ def search_salons_by_service(service_name: str, latitude: float = None, longitud
                 svc_name = svc.get("name", service_name)
                 svc_price = svc.get("price", 0)
                 svc_duration = svc.get("minDurationUnits", svc.get("durationMinutes", 30))
-                
-                lines.append(f"- ID: {salon_id} | {salon_name} : Situé à {salon_address}{dist_str} | Offre : '{svc_name}' à {svc_price} FCFA ({svc_duration} min)")
+                lines.append(f"- ID: {salon_id} | {salon_name} : Situé à {salon_address}{dist_str} | Prestation: {svc_name} : {svc_price} FCFA | {svc_duration} min")
             return "\n".join(lines)
     except Exception as e:
         return f"Erreur lors de la recherche de salons par service : {str(e)}"
+
+
+@tool
+def list_salon_appointments(salon_id: str, date: str = None) -> str:
+    """Affiche la liste de tous les rendez-vous d'un salon (confirmés, passés, futurs) pour une date donnée (format YYYY-MM-DD, ex: '2026-06-25').
+    Si aucun argument de date n'est passé, récupère l'ensemble des rendez-vous (toutes dates confondues) pour permettre des analyses globales.
+    Utilisez cet outil lorsque vous êtes en mode pro et que le gérant ou coiffeur demande à voir les rendez-vous, le planning de la journée ou s'il y a des créneaux occupés.
+    Arguments:
+      salon_id: L'identifiant unique (ID) du salon.
+      date: La date souhaitée au format YYYY-MM-DD (optionnel)."""
+    import datetime
+    import re
+    if not salon_id or not re.match(r"^[0-9a-fA-F]{24}$", salon_id):
+        return "Erreur : ID du salon invalide."
+    
+    if date:
+        url = f"{settings.nestjs_base_url}/agent/salons/{salon_id}/appointments?date={date}"
+        prefix = f"Liste des rendez-vous du salon pour le {date} :\n"
+        empty_msg = f"Aucun rendez-vous planifié pour le {date} dans cet établissement."
+    else:
+        url = f"{settings.nestjs_base_url}/agent/salons/{salon_id}/appointments"
+        prefix = "Liste de tous les rendez-vous du salon (toutes dates confondues) :\n"
+        empty_msg = "Aucun rendez-vous planifié dans cet établissement."
+        
+    headers = {"x-api-token": settings.api_shared_token}
+    
+    try:
+        with httpx.Client() as client:
+            resp = client.get(url, headers=headers)
+            if resp.status_code != 200:
+                return f"Erreur de récupération des rendez-vous du salon (code {resp.status_code})."
+            data = resp.json()
+            if not data or len(data) == 0:
+                return empty_msg
+            
+            lines = []
+            for apt in data:
+                date_str = apt.get("appointmentDate", "inconnue")
+                status_raw = apt.get("status", "inconnu")
+                status_map = {
+                    "completed": "Terminé (clôturé)",
+                    "confirmed": "Confirmé",
+                    "pending": "En attente de confirmation",
+                    "awaiting_salon": "En attente du salon",
+                    "cancelled": "Annulé"
+                }
+                status = status_map.get(status_raw, status_raw)
+                client_name = apt.get("clientName", "Client inconnu")
+                svc_names = apt.get("selectedServiceNames") or "Prestation inconnue"
+                staff_name = apt.get("staffName") or "Non assigné"
+                price = apt.get("billingFinalPrice", 0)
+                currency = apt.get("currency", "XOF")
+                if currency == 'EUR':
+                    currency_symbol = '€'
+                elif currency in ['XOF', 'XAF']:
+                    currency_symbol = 'FCFA'
+                else:
+                    currency_symbol = currency
+                duration = apt.get("durationMinutes", 30)
+                apt_id = apt.get("_id") or apt.get("id") or "inconnu"
+                lines.append(f"- Rendez-vous le {date_str} (Durée: {duration} min) | Client: {client_name} | Prestation(s): {svc_names} | Collaborateur: {staff_name} | Prix: {price} {currency_symbol} | Statut: {status} (ID RDV: {apt_id})")
+            return prefix + "\n".join(lines)
+    except Exception as e:
+        return f"Erreur de connexion lors de la récupération des rendez-vous : {str(e)}"
+
+
+@tool
+def get_pro_dashboard_summary(salon_id: str, date: str = None) -> str:
+    """Affiche la synthèse d'activité et financière du salon pour une date donnée (format YYYY-MM-DD, ex: '2026-06-25').
+    Utilisez cet outil pour répondre à des questions comme 'quel est mon bilan de la journée ?' ou 'combien de chiffre d'affaires aujourd'hui ?'.
+    Arguments:
+      salon_id: L'identifiant unique (ID) du salon.
+      date: La date souhaitée au format YYYY-MM-DD (optionnel, par défaut aujourd'hui)."""
+    import datetime
+    import re
+    if not salon_id or not re.match(r"^[0-9a-fA-F]{24}$", salon_id):
+        return "Erreur : ID du salon invalide."
+        
+    if not date:
+        date = datetime.date.today().isoformat()
+        
+    url = f"{settings.nestjs_base_url}/agent/salons/{salon_id}/summary?date={date}"
+    headers = {"x-api-token": settings.api_shared_token}
+    
+    try:
+        with httpx.Client() as client:
+            resp = client.get(url, headers=headers)
+            if resp.status_code != 200:
+                return f"Erreur de récupération de la synthèse du salon (code {resp.status_code})."
+            data = resp.json()
+            
+            currency = data.get('currency', 'XOF')
+            if currency == 'EUR':
+                currency_symbol = '€'
+            elif currency in ['XOF', 'XAF']:
+                currency_symbol = 'FCFA'
+            else:
+                currency_symbol = currency
+                
+            res = (
+                f"Synthèse d'activité du salon pour le {date} :\n"
+                f"- Nombre total de réservations : {data.get('totalCount', 0)}\n"
+                f"- Confirmés / Complétés (Terminés) : {data.get('confirmedCount', 0)}\n"
+                f"- En attente de confirmation / paiement : {data.get('pendingCount', 0)}\n"
+                f"- Chiffre d'affaires estimé (sur réservations confirmées/complétées/terminées) : {data.get('totalRevenue', 0)} {currency_symbol}\n"
+                f"- Produits en alerte stock bas (< 5 unités) : {data.get('lowStockCount', 0)}"
+            )
+            return res
+    except Exception as e:
+        return f"Erreur de connexion lors de la récupération de la synthèse : {str(e)}"
+
+
+@tool
+def get_salon_analytics(salon_id: str, period: str = 'month') -> str:
+    """Affiche les statistiques de performance des prestations du salon (classement par chiffre d'affaires et popularité).
+    Utilisez cet outil pour répondre à des questions comme 'quel service rapporte le plus ?' ou 'quelles sont mes prestations les plus populaires ?'.
+    Arguments:
+      salon_id: L'identifiant unique (ID) du salon.
+      period: La période d'analyse ('week', 'month', 'year', par défaut 'month')."""
+    import re
+    if not salon_id or not re.match(r"^[0-9a-fA-F]{24}$", salon_id):
+        return "Erreur : ID du salon invalide."
+        
+    url = f"{settings.nestjs_base_url}/agent/salons/{salon_id}/analytics?period={period}"
+    headers = {"x-api-token": settings.api_shared_token}
+    
+    try:
+        with httpx.Client() as client:
+            resp = client.get(url, headers=headers)
+            if resp.status_code != 200:
+                return f"Erreur de récupération des analyses du salon (code {resp.status_code})."
+            data = resp.json()
+            
+            top_services = data.get("topServices", [])
+            currency = data.get("currency", "XOF")
+            if currency == 'EUR':
+                currency_symbol = '€'
+            elif currency in ['XOF', 'XAF']:
+                currency_symbol = 'FCFA'
+            else:
+                currency_symbol = currency
+                
+            if not top_services:
+                return f"Aucune donnée analytique sur les prestations complétées pour la période ({period})."
+                
+            lines = []
+            for idx, svc in enumerate(top_services, 1):
+                name = svc.get("name")
+                revenue = svc.get("revenue", 0)
+                count = svc.get("count", 0)
+                lines.append(f"{idx}. {name} : {revenue} {currency_symbol} générés ({count} réservations complétées)")
+                
+            return f"Performances des prestations du salon pour la période ({period}) :\n" + "\n".join(lines)
+    except Exception as e:
+        return f"Erreur de connexion lors de la récupération des analyses : {str(e)}"
+
+
+@tool
+def get_low_stock_products(salon_id: str, threshold: int = 5) -> str:
+    """Affiche la liste des produits de la boutique du salon dont le stock est inférieur ou égal au seuil spécifié.
+    Utilisez cet outil lorsque le pro demande s'il y a des produits en rupture ou s'il doit réapprovisionner ses stocks.
+    Arguments:
+      salon_id: L'identifiant unique (ID) du salon.
+      threshold: Seuil critique de stock en deçà duquel un produit est considéré comme bas (optionnel, par défaut 5)."""
+    import re
+    if not salon_id or not re.match(r"^[0-9a-fA-F]{24}$", salon_id):
+        return "Erreur : ID du salon invalide."
+        
+    url = f"{settings.nestjs_base_url}/agent/salons/{salon_id}/products/low-stock?threshold={threshold}"
+    headers = {"x-api-token": settings.api_shared_token}
+    
+    try:
+        with httpx.Client() as client:
+            resp = client.get(url, headers=headers)
+            if resp.status_code != 200:
+                return f"Erreur de récupération des produits en stock bas (code {resp.status_code})."
+            data = resp.json()
+            if not data or len(data) == 0:
+                return f"Aucun produit n'est en alerte stock bas (seuil critique ≤ {threshold} unités)."
+            
+            lines = []
+            for prod in data:
+                p_name = prod.get("name", "Produit sans nom")
+                p_brand = prod.get("brand", "Marque inconnue")
+                p_stock = prod.get("stock", 0)
+                p_price = prod.get("price", 0)
+                lines.append(f"- {p_name} ({p_brand}) : {p_stock} unités restantes (Prix : {p_price} FCFA)")
+            return f"Liste des produits en alerte stock bas (seuil ≤ {threshold}) :\n" + "\n".join(lines)
+    except Exception as e:
+        return f"Erreur de connexion lors de la récupération du stock bas : {str(e)}"
 
 
 class KoraAgentService:
@@ -488,7 +677,7 @@ class KoraAgentService:
             self.client = None
             logger.error(f"Failed to initialize DeerFlowClient: {str(e)}")
 
-    async def chat(self, messages: list, user_id: str, latitude: float = None, longitude: float = None, client_context: str = None) -> dict:
+    async def chat(self, messages: list, user_id: str, latitude: float = None, longitude: float = None, client_context: str = None, role: str = "client", salon_id: str = None) -> dict:
         if self.client is None:
             return {
                 "model": settings.ollama_model,
@@ -508,33 +697,48 @@ class KoraAgentService:
             user_message = "Bonjour"
 
         # Directives de sécurité et formatage pour échange vocal/assistant
-        system_rules = (
-            "Tu es Kora, l'assistante beauté IA de la plateforme KOUP. "
-            "RÈGLES IMPORTANTES DE SÉCURITÉ ET DE COMPORTEMENT : "
-            "1. Sois extrêmement chaleureuse, accueillante, naturelle, de bonne humeur, et concise (1 à 3 phrases courtes maximum par réponse). "
-            "2. N'affiche JAMAIS d'identifiants techniques (IDs de 24 caractères comme salon_id, service_id, ou appointment_id) dans le texte principal destiné à l'utilisateur. Utilise des expressions simples, claires, et parfaitement compréhensibles par tous. "
-            "3. Rends tes réponses vivantes et dynamiques en utilisant généreusement des émoticônes/émojis et des puces scintillantes (ex: ✨, 💇, 📅, 💈, 🌟, 💫) pour marquer les étapes ou les choix. "
-            "4. Si tu dois présenter des choix (salons, prestations/services, rendez-vous, produits ou créneaux) : "
-            "   - Tu dois TOUJOURS numéroter ces choix dans le texte principal destiné à l'utilisateur (ex: '1. Moya delux, 2. Salon Alliance...') pour que les utilisateurs vocaux puissent facilement énoncer leur sélection ('Je choisis le 1', 'Le premier'). "
-            "   - Place-les ensuite TOUJOURS à la fin de ta réponse sous l'un des formats bruts stricts suivants pour que l'application puisse les intercepter, les animer et les afficher sous forme de jolies cartes interactives sans que l'utilisateur ne voie les IDs :\n"
-            "     * Pour les salons : `- ID: <id_salon> | <Nom du Salon> : Situé à <Adresse>`\n"
-            "     * Pour les prestations : `- ID: <id_prestation> | <Nom de la Prestation> : <Prix> FCFA | <Durée> min`\n"
-            "     * Pour les rendez-vous : `- Rendez-vous le <Date ISO ou claire> au salon '<Nom du Salon>' (ID Salon: <id_salon>) (ID RDV: <id_rdv>) (Statut : <Statut>)`\n"
-            "   Ne cite JAMAIS ces identifiants (IDs) en dehors de ces formats de liste brute en fin de message.\n"
-            "5. Règles pour le report (reschedule) d'un rendez-vous :\n"
-            "   - Tu dois TOUJOURS respecter la politique du salon et la disponibilité des places.\n"
-            "   - Si tu essaies de reporter et que l'outil te signale que le créneau est indisponible (ex: 'Créneau indisponible'), appelle immédiatement l'outil `get_available_slots` pour cette date (avec le salon_id et éventuellement le service_id de la prestation si tu le connais) pour voir les autres créneaux de libre, et propose activement ces alternatives au client.\n"
-            "   - Si tu essaies de reporter et que l'outil te signale que le délai de report est dépassé, informe poliment le client que la politique du salon ne permet plus de modifier ce rendez-vous à ce stade. Propose-lui alors de choisir entre maintenir son rendez-vous à la date actuelle ou bien de l'annuler complètement.\n"
-            "6. INTERDICTION ABSOLUE D'INVENTER : Tu ne dois sous aucun prétexte inventer, halluciner, imaginer ou générer des salons, prestations, créneaux horaires ou informations fictifs (comme 'Hair-Care SF', 'Locks & Co', etc.) qui ne sont pas explicitement retournés par tes outils. Base-toi UNIQUEMENT et STRICTEMENT sur les données réelles renvoyées par les outils (comme list_salons ou get_available_slots). S'il n'y a qu'un seul salon à proximité dans la base de données, affiche uniquement celui-ci. Si aucun salon n'est retourné par l'outil, réponds poliment que tu n'as trouvé aucun salon disponible à proximité.\n"
-            "7. FIN DES OPTIONS APRÈS SÉLECTION : Dès que l'utilisateur a sélectionné et validé un choix (par exemple, s'il a cliqué sur 'Valider le choix' d'un salon ou a écrit 'Je choisis le salon ...'), ce choix est considéré comme définitivement acquis. Tu ne dois plus JAMAIS ré-afficher cette option ou ce salon sous forme de liste brute (`- ID: ...`) à la fin de tes réponses suivantes. Pose simplement la question d'après (par exemple, demander la date ou la prestation souhaitée) uniquement par du texte simple.\n"
-            "8. RECHERCHE AUTONOME DES CRÉNEAUX : Si l'utilisateur a choisi un salon pour voir les créneaux disponibles (ou si l'historique montre qu'il cherche des créneaux libres), sois autonome et proactive. N'attends pas qu'il te donne une date ! Utilise directement l'outil `get_available_slots` pour la date d'aujourd'hui (fournie dans le contexte) ou celle de demain. Propose-lui ensuite directement les horaires de créneaux trouvés afin qu'il n'ait pas à deviner ou à saisir la date lui-même.\n"
-            "9. UTILISATION ACTIVE DU PROFIL ET DES HABITUDES : Analyse le profil beauté (ex: type de cheveux 'Locks', type de peau, styles) et les habitudes (panier moyen, produit préféré comme 'Florame', prestation phare) fournis dans le contexte. Si l'utilisateur demande des conseils de style, de soins ou des suggestions de prestations, propose-lui DIRECTEMENT des solutions adaptées à son profil (ex: soins pour locks) sans lui poser de questions sur ses caractéristiques physiques, car tu les as déjà dans son profil !\n"
-            "10. PROACTIVITÉ EN CAS D'ABSENCE DE PRODUIT OU SERVICE : Si l'utilisateur demande une prestation ou un produit spécifique, tu devez d'abord interroger `get_salon_details` pour le salon concerné. Si le produit ou la prestation demandée (comme son produit favori 'Florame') n'est pas disponible dans ce salon :\n"
-            "   - Propose immédiatement une alternative équivalente en stock ou disponible dans ce même salon en te basant sur son profil (ex: un autre shampoing ou soin adapté disponible dans le salon).\n"
-            "   - ET appelle automatiquement l'outil `search_marketplace_products` (pour les produits) ou `search_salons_by_service` (pour les services) pour rechercher d'autres salons à proximité disposant du produit ou de la prestation d'origine, puis propose-lui ces salons sous forme de liste brute (`- ID: ...` ou liste de produits) pour qu'il puisse les choisir.\n"
-            "11. CONFIRMATION EXPLICITE AVANT RÉSERVATION OU ACTION : Ne réserve, ne reporte et n'annule JAMAIS un rendez-vous (ne lance pas book_appointment, reschedule_appointment ou cancel_appointment) de manière automatique ou à la première sélection de l'utilisateur. Tu dois TOUJOURS poser la question de confirmation d'abord (ex: 'Souhaitez-vous que je réserve cette prestation pour vous ?' ou 'Voulez-vous confirmer ce report ?') et attendre l'accord explicite du client (ex: 'Oui', 'Je confirme', 'Vas-y') avant d'exécuter l'outil correspondant.\n"
-            "12. GESTION DU CHOIX NUMÉRIQUE : Si l'utilisateur énonce un numéro de la liste (ex: 'Je choisis le 1', 'Le premier'), retrouve l'élément correspondant dans la liste numérotée que tu as présentée dans ton précédent message et utilise son ID technique associé pour appeler l'outil ou continuer l'action."
-        )
+        if role == "salon":
+            system_rules = (
+                "Tu es Kora Pro, l'assistante intelligente et co-pilote d'activité de la plateforme KOUP pour ce salon de coiffure/beauté. "
+                "RÈGLES IMPORTANTES DE SÉCURITÉ ET DE COMPORTEMENT (MODE PROFESSIONNEL) : "
+                "1. Sois chaleureuse, accueillante, naturelle, de bonne humeur, et concise (1 à 3 phrases courtes maximum par réponse). "
+                "2. Aide activement le gérant ou collaborateur à piloter son salon : lister les rendez-vous, consulter le chiffre d'affaires, vérifier les stocks bas, rédiger des modèles de SMS promotionnels. "
+                "3. N'affiche JAMAIS d'identifiants techniques (IDs de 24 caractères comme salon_id, product_id, ou appointment_id) dans le texte destiné à l'utilisateur. "
+                "4. Rends tes réponses vivantes et dynamiques en utilisant des émojis professionnels (ex: 📊, 💇, 📅, 📦, 💰, 🚨, ✨). "
+                "5. Quand tu proposes des créneaux horaires libres ou des options de rendez-vous, utilise STRICTEMENT les données de tes outils (par exemple list_salon_appointments ou get_available_slots). "
+                "   Tu dois impérativement tenir compte des configurations de l'établissement comme le nombre de collaborateurs actifs sur un créneau donné (qui définit le nombre maximal de réservations simultanées autorisées) pour proposer de VRAIS créneaux ou trous réellement libres de l'agenda, évitant ainsi les sur-réservations. S'il n'y a pas de créneau disponible, propose de modifier la date d'analyse ou de proposer un autre collaborateur. "
+                "6. Si on te demande de rédiger une offre promotionnelle ou une annonce de recrutement, propose un texte court, attractif et prêt à être copié-collé.\n"
+                "7. Pour les rendez-vous, distingue bien les statuts en français : 'completed' signifie 'Terminé (clôturé)', 'confirmed' signifie 'Confirmé', 'pending' signifie 'En attente'. Utilise les devises réelles fournies par les outils (ex: €, FCFA, etc.) et ne dis jamais FCFA par défaut si le salon utilise une autre currency/devise.\n"
+                "8. Tu as un accès complet et sans restriction à toutes les informations de ton salon (horaires d'ouverture, collaborateurs, prestations et tarifs, produits en boutique, synthèse d'activité du jour et devise locale) directement dans ton contexte. Utilise ces données de manière proactive pour répondre précisément et immédiatement aux questions sans avoir besoin d'appeler get_salon_details."
+            )
+        else:
+            system_rules = (
+                "Tu es Kora, l'assistante beauté IA de la plateforme KOUP. "
+                "RÈGLES IMPORTANTES DE SÉCURITÉ ET DE COMPORTEMENT : "
+                "1. Sois extrêmement chaleureuse, accueillante, naturelle, de bonne humeur, et concise (1 à 3 phrases courtes maximum par réponse). "
+                "2. N'affiche JAMAIS d'identifiants techniques (IDs de 24 caractères comme salon_id, service_id, ou appointment_id) dans le texte principal destiné à l'utilisateur. Utilise des expressions simples, claires, et parfaitement compréhensibles par tous. "
+                "3. Rends tes réponses vivantes et dynamiques en utilisant généreusement des émoticônes/émojis et des puces scintillantes (ex: ✨, 💇, 📅, 💈, 🌟, 💫) pour marquer les étapes ou les choix. "
+                "4. Si tu dois présenter des choix (salons, prestations/services, rendez-vous, produits ou créneaux) : "
+                "   - Tu dois TOUJOURS numéroter ces choix dans le texte principal destiné à l'utilisateur (ex: '1. Moya delux, 2. Salon Alliance...') pour que les utilisateurs vocaux puissent facilement énoncer leur sélection ('Je choisis le 1', 'Le premier'). "
+                "   - Place-les ensuite TOUJOURS à la fin de ta réponse sous l'un des formats bruts stricts suivants pour que l'application puisse les intercepter, les animer et les afficher sous forme de jolies cartes interactives sans que l'utilisateur ne voie les IDs :\n"
+                "     * Pour les salons : `- ID: <id_salon> | <Nom du Salon> : Situé à <Adresse>`\n"
+                "     * Pour les prestations : `- ID: <id_prestation> | <Nom de la Prestation> : <Prix> FCFA | <Durée> min`\n"
+                "     * Pour les rendez-vous : `- Rendez-vous le <Date ISO ou claire> au salon '<Nom du Salon>' (ID Salon: <id_salon>) (ID RDV: <id_rdv>) (Statut : <Statut>)`\n"
+                "   Ne cite JAMAIS ces identifiants (IDs) en dehors de ces formats de liste brute en fin de message.\n"
+                "5. Règles pour le report (reschedule) d'un rendez-vous :\n"
+                "   - Tu dois TOUJOURS respecter la politique du salon et la disponibilité des places.\n"
+                "   - Si tu essaies de reporter et que l'outil te signale que le créneau est indisponible (ex: 'Créneau indisponible'), appelle immédiatement l'outil `get_available_slots` pour cette date (avec le salon_id et éventuellement le service_id de la prestation si tu le connais) pour voir les autres créneaux de libre, et propose activement ces alternatives au client.\n"
+                "   - Si tu essaies de reporter et que l'outil te signale que le délai de report est dépassé, informe poliment le client que la politique du salon ne permet plus de modifier ce rendez-vous à ce stade. Propose-lui alors de choisir entre maintenir son rendez-vous à la date actuelle ou bien de l'annuler complètement.\n"
+                "6. INTERDICTION ABSOLUE D'INVENTER : Tu ne dois sous aucun prétexte inventer, halluciner, imaginer ou générer des salons, prestations, créneaux horaires ou informations fictifs (comme 'Hair-Care SF', 'Locks & Co', etc.) qui ne sont pas explicitement retournés par tes outils. Base-toi UNIQUEMENT et STRICTEMENT sur les données réelles renvoyées par les outils (comme list_salons ou get_available_slots). S'il n'y a qu'un seul salon à proximité dans la base de données, affiche uniquement celui-ci. Si aucun salon n'est retourné par l'outil, réponds poliment que tu n'as trouvé aucun salon disponible à proximité.\n"
+                "7. FIN DES OPTIONS APRÈS SÉLECTION : Dès que l'utilisateur a sélectionné et validé un choix (par exemple, s'il a cliqué sur 'Valider le choix' d'un salon ou a écrit 'Je choisis le salon ...'), ce choix est considéré comme définitivement acquis. Tu ne dois plus JAMAIS ré-afficher cette option ou ce salon sous forme de liste brute (`- ID: ...`) à la fin de tes réponses suivantes. Pose simplement la question d'après (par exemple, demander la date ou la prestation souhaitée) uniquement par du texte simple.\n"
+                "8. RECHERCHE AUTONOME DES CRÉNEAUX : Si l'utilisateur a choisi un salon pour voir les créneaux disponibles (ou si l'historique montre qu'il cherche des créneaux libres), sois autonome et proactive. N'attends pas qu'il te donne une date ! Utilise directement l'outil `get_available_slots` pour la date d'aujourd'hui (fournie dans le contexte) ou celle de demain. Propose-lui ensuite directement les horaires de créneaux trouvés afin qu'il n'ait pas à deviner ou à saisir la date lui-même.\n"
+                "9. UTILISATION ACTIVE DU PROFIL ET DES HABITUDES : Analyse le profil beauté (ex: type de cheveux 'Locks', type de peau, styles) et les habitudes (panier moyen, produit préféré comme 'Florame', prestation phare) fournis dans le contexte. Si l'utilisateur demande des conseils de style, de soins ou des suggestions de prestations, propose-lui DIRECTEMENT des solutions adaptées à son profil (ex: soins pour locks) sans lui poser de questions sur ses caractéristiques physiques, car tu les as déjà dans son profil !\n"
+                "10. PROACTIVITÉ EN CAS D'ABSENCE DE PRODUIT OU SERVICE : Si l'utilisateur demande une prestation ou un produit spécifique, tu devez d'abord interroger `get_salon_details` pour le salon concerné. Si le produit ou la prestation demandée (comme son produit favori 'Florame') n'est pas disponible dans ce salon :\n"
+                "   - Propose immédiatement une alternative équivalente en stock ou disponible dans ce même salon en te basant sur son profil (ex: un autre shampoing ou soin adapté disponible dans le salon).\n"
+                "   - ET appelle automatiquement l'outil `search_marketplace_products` (pour les produits) ou `search_salons_by_service` (pour les services) pour rechercher d'autres salons à proximité disposant du produit ou de la prestation d'origine, puis propose-lui ces salons sous forme de liste brute (`- ID: ...` ou liste de produits) pour qu'il puisse les choisir.\n"
+                "11. CONFIRMATION EXPLICITE AVANT RÉSERVATION OU ACTION : Ne réserve, ne reporte et n'annule JAMAIS un rendez-vous (ne lance pas book_appointment, reschedule_appointment ou cancel_appointment) de manière automatique ou à la première sélection de l'utilisateur. Tu dois TOUJOURS poser la question de confirmation d'abord (ex: 'Souhaitez-vous que je réserve cette prestation pour vous ?' ou 'Voulez-vous confirmer ce report ?') et attendre l'accord explicite du client (ex: 'Oui', 'Je confirme', 'Vas-y') avant d'exécuter l'outil correspondant.\n"
+                "12. GESTION DU CHOIX NUMÉRIQUE : Si l'utilisateur énonce un numéro de la liste (ex: 'Je choisis le 1', 'Le premier'), retrouve l'élément correspondant dans la liste numérotée que tu as présentée dans ton précédent message et utilise son ID technique associé pour appeler l'outil ou continuer l'action."
+            )
 
         # Injecter le contexte de localisation, d'identité de l'utilisateur, de la date courante et du profil beauté/habitudes
         import datetime
@@ -551,7 +755,15 @@ class KoraAgentService:
         if latitude is not None and longitude is not None:
             context_parts.append(f"Localisation GPS : latitude={latitude}, longitude={longitude}")
         if client_context:
-            context_parts.append(f"Profil Beauté & Habitudes du client connecté :\n{client_context}")
+            if role == "salon":
+                context_parts.append(f"Profil & Activité du salon connecté :\n{client_context}")
+            else:
+                context_parts.append(f"Profil Beauté & Habitudes du client connecté :\n{client_context}")
+        
+        # Injecter directement le salonId si disponible
+        if salon_id:
+            context_parts.append(f"ID Salon actif (salon_id) : {salon_id}")
+            
         context_msg = " | ".join(context_parts)
         
         full_message = f"[Directives: {system_rules}]\n[Contexte: {context_msg}]\n\n{user_message}"
@@ -579,5 +791,6 @@ class KoraAgentService:
                 "content": f"Désolée, une erreur interne s'est produite lors de la génération. ({str(e)})",
                 "done": True
             }
+
 
 
