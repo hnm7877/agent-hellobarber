@@ -771,11 +771,21 @@ class KoraAgentService:
 
         try:
             import asyncio
-            response_text = await asyncio.to_thread(
-                self.client.chat,
-                full_message,
-                thread_id=thread_id
-            )
+            from deerflow.runtime.user_context import set_current_user, reset_current_user
+            
+            class SimpleUser:
+                def __init__(self, uid: str):
+                    self.id = uid
+            
+            token = set_current_user(SimpleUser(user_id))
+            try:
+                response_text = await asyncio.to_thread(
+                    self.client.chat,
+                    full_message,
+                    thread_id=thread_id
+                )
+            finally:
+                reset_current_user(token)
 
             action = _user_actions.pop(user_id, None)
             return {
