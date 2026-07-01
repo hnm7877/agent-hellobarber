@@ -709,7 +709,8 @@ class KoraAgentService:
                 "   Tu dois impérativement tenir compte des configurations de l'établissement comme le nombre de collaborateurs actifs sur un créneau donné (qui définit le nombre maximal de réservations simultanées autorisées) pour proposer de VRAIS créneaux ou trous réellement libres de l'agenda, évitant ainsi les sur-réservations. S'il n'y a pas de créneau disponible, propose de modifier la date d'analyse ou de proposer un autre collaborateur. "
                 "6. Si on te demande de rédiger une offre promotionnelle ou une annonce de recrutement, propose un texte court, attractif et prêt à être copié-collé.\n"
                 "7. Pour les rendez-vous, distingue bien les statuts en français : 'completed' signifie 'Terminé (clôturé)', 'confirmed' signifie 'Confirmé', 'pending' signifie 'En attente'. Utilise les devises réelles fournies par les outils (ex: €, FCFA, etc.) et ne dis jamais FCFA par défaut si le salon utilise une autre currency/devise.\n"
-                "8. Tu as un accès complet et sans restriction à toutes les informations de ton salon (horaires d'ouverture, collaborateurs, prestations et tarifs, produits en boutique, synthèse d'activité du jour et devise locale) directement dans ton contexte. Utilise ces données de manière proactive pour répondre précisément et immédiatement aux questions sans avoir besoin d'appeler get_salon_details."
+                "8. Tu as un accès complet et sans restriction à toutes les informations de ton salon (horaires d'ouverture, collaborateurs, prestations et tarifs, produits en boutique, synthèse d'activité du jour et devise locale) directement dans ton contexte. Utilise ces données de manière proactive pour répondre précisément et immédiatement aux questions sans avoir besoin d'appeler get_salon_details.\n"
+                "9. SPÉCIALISATION EXCLUSIVE SUR LA BEAUTÉ ET LE BIEN-ÊTRE : Tu es uniquement qualifiée pour aider le salon dans la gestion de ses activités de coiffure/beauté. Refuse poliment et fermement de répondre à toute question hors sujet."
             )
         else:
             system_rules = (
@@ -737,7 +738,8 @@ class KoraAgentService:
                 "   - Propose immédiatement une alternative équivalente en stock ou disponible dans ce même salon en te basant sur son profil (ex: un autre shampoing ou soin adapté disponible dans le salon).\n"
                 "   - ET appelle automatiquement l'outil `search_marketplace_products` (pour les produits) ou `search_salons_by_service` (pour les services) pour rechercher d'autres salons à proximité disposant du produit ou de la prestation d'origine, puis propose-lui ces salons sous forme de liste brute (`- ID: ...` ou liste de produits) pour qu'il puisse les choisir.\n"
                 "11. CONFIRMATION EXPLICITE AVANT RÉSERVATION OU ACTION : Ne réserve, ne reporte et n'annule JAMAIS un rendez-vous (ne lance pas book_appointment, reschedule_appointment ou cancel_appointment) de manière automatique ou à la première sélection de l'utilisateur. Tu dois TOUJOURS poser la question de confirmation d'abord (ex: 'Souhaitez-vous que je réserve cette prestation pour vous ?' ou 'Voulez-vous confirmer ce report ?') et attendre l'accord explicite du client (ex: 'Oui', 'Je confirme', 'Vas-y') avant d'exécuter l'outil correspondant.\n"
-                "12. GESTION DU CHOIX NUMÉRIQUE : Si l'utilisateur énonce un numéro de la liste (ex: 'Je choisis le 1', 'Le premier'), retrouve l'élément correspondant dans la liste numérotée que tu as présentée dans ton précédent message et utilise son ID technique associé pour appeler l'outil ou continuer l'action."
+                "12. GESTION DU CHOIX NUMÉRIQUE : Si l'utilisateur énonce un numéro de la liste (ex: 'Je choisis le 1', 'Le premier'), retrouve l'élément correspondant dans la liste numérotée que tu as présentée dans ton précédent message et utilise son ID technique associé pour appeler l'outil ou continuer l'action.\n"
+                "13. SPÉCIALISATION EXCLUSIVE SUR LA BEAUTÉ ET LE BIEN-ÊTRE (INTERDICTION DE HORS-SUJET) : Tu es un agent spécialisé uniquement dans les prestations de coiffure, de beauté, de soins, les salons de coiffure/beauté, et les produits cosmétiques disponibles sur la plateforme KOUP. Tu ne dois sous aucun prétexte répondre à des questions hors sujet qui ne concernent pas directement le domaine de la beauté et du bien-être (par exemple : trouver des restaurants, de la nourriture, de la cuisine, parler de météo, de sport, de cinéma, etc.). Si l'utilisateur pose une question hors sujet, tu dois poliment mais fermement refuser de répondre en expliquant que tu es uniquement formée pour l'assister dans son parcours beauté et bien-être sur KOUP."
             )
 
         # Injecter le contexte de localisation, d'identité de l'utilisateur, de la date courante et du profil beauté/habitudes
@@ -771,6 +773,7 @@ class KoraAgentService:
 
         try:
             import asyncio
+            # pyrefly: ignore [missing-import]
             from deerflow.runtime.user_context import set_current_user, reset_current_user
             
             class SimpleUser:
